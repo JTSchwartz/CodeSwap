@@ -1,0 +1,55 @@
+<idea-plugin>
+  <id>com.jtschwartz.codeswap</id>
+  <name>Code Swap</name>
+  <version>1.0</version>
+	<vendor email="jacob@jtschwartz.com" url="https://jtschwartz.com">Jacob Schwartz</vendor>
+
+	<description>
+		<![CDATA[
+    		Code Swap takes swapping code from:<br/>
+    		<code>temp = a</code><br/>
+    		<code>a = b</code><br/>
+    		<code>b = temp</code><br/>
+    		To:<br/>
+    		<code>a, b = b, a</code>
+    	]]>
+	</description>
+
+	<change-notes>
+		<![CDATA[
+      		Initial implementation. No changes, just creation.
+    	]]>
+	</change-notes>
+
+  <idea-version since-build="173.0"/>
+
+  <depends>com.intellij.modules.lang</depends>
+
+  <extensions defaultExtensionNs="com.intellij">
+    <!-- Add your extensions here -->
+  </extensions>
+
+  <actions>
+	  <action id="com.jtschwartz.codeswap.SoftCodeAnchor" class="com.jtschwartz.codeswap.SoftCodeAnchor"
+			  text="Soft Code Anchor">
+		  <add-to-group group-id="CutCopyPasteGroup" anchor="last"/>
+		  <keyboard-shortcut keymap="$default" first-keystroke="alt PAGE_UP"/>
+	  </action>
+	  <action id="com.jtschwartz.codeswap.HardCodeAnchor" class="com.jtschwartz.codeswap.HardCodeAnchor"
+			  text="Hard Code Anchor">
+		  <add-to-group group-id="CutCopyPasteGroup" anchor="last"/>
+		  <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt PAGE_UP"/>
+	  </action>
+	  <action id="com.jtschwartz.codeswap.SoftCodeSwap" class="com.jtschwartz.codeswap.SoftCodeSwap"
+			  text="Soft Code Swap">
+		  <add-to-group group-id="CutCopyPasteGroup" anchor="last"/>
+		  <keyboard-shortcut keymap="$default" first-keystroke="alt PAGE_DOWN"/>
+	  </action>
+	  <action id="com.jtschwartz.codeswap.HardCodeSwap" class="com.jtschwartz.codeswap.HardCodeSwap"
+			  text="Hard Code Swap">
+		  <add-to-group group-id="CutCopyPasteGroup" anchor="last"/>
+		  <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt PAGE_DOWN"/>
+	  </action>
+  </actions>
+
+</idea-plugin>
