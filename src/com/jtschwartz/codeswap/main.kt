@@ -13,10 +13,11 @@ abstract class CodeSwapConcept(open var needsSelection: Boolean = true): AnActio
 	companion object {
 		lateinit var anchorRange: TextRange
 		lateinit var swapRange: TextRange
-		val isAnchorFirst = { anchorRange.startOffset < swapRange.startOffset }
+		val isAnchorFirst = {anchorRange.startOffset < swapRange.startOffset}
+		var anchorDoc: Document? = null
 		var doc: Document? = null
-		var editor: Editor?  = null
-		var project: Project?  = null
+		var editor: Editor? = null
+		var project: Project? = null
 	}
 	
 	override fun update(e: AnActionEvent) {
@@ -38,6 +39,7 @@ abstract class CodeSwapConcept(open var needsSelection: Boolean = true): AnActio
 open class SoftCodeAnchor: CodeSwapConcept() {
 	override fun actionPerformed(e: AnActionEvent) {
 		anchorRange = this getSelectionRangeFrom editor!!
+		anchorDoc = doc
 	}
 }
 
@@ -46,23 +48,28 @@ open class SoftCodeSwap: CodeSwapConcept() {
 		swapRange = this getSelectionRangeFrom editor!!
 		editor!!.caretModel.primaryCaret.removeSelection()
 		
-		if (doSelectionsOverlap()) return
+		val isSameDoc = doc == anchorDoc
 		
-		if (anchorRange.endOffset >= doc!!.textLength) anchorRange = TextRange(anchorRange.startOffset, doc!!.textLength)
+		if (anchorDoc == null || !anchorDoc!!.isWritable || (isSameDoc && doSelectionsOverlap())) return
 		
-		val anchorText = doc!!.getText(anchorRange)
+		if (anchorRange.endOffset >= anchorDoc!!.textLength) anchorRange = TextRange(anchorRange.startOffset, anchorDoc!!.textLength)
+		
+		val anchorText = anchorDoc!!.getText(anchorRange)
 		val swapText = doc!!.getText(swapRange)
 		
 		WriteCommandAction.runWriteCommandAction(project) {
-			anchorRange = if (isAnchorFirst()) {
-				doc!!.replaceString(swapRange.startOffset, swapRange.endOffset, anchorText)
-				doc!!.replaceString(anchorRange.startOffset, anchorRange.endOffset, swapText)
-				TextRange(swapRange.startOffset + (swapText.length - anchorText.length), swapRange.startOffset + swapText.length)
-			} else {
-				doc!!.replaceString(anchorRange.startOffset, anchorRange.endOffset, swapText)
-				doc!!.replaceString(swapRange.startOffset, swapRange.endOffset, anchorText)
-				TextRange(swapRange.startOffset, swapRange.startOffset + anchorText.length)
-			}
+			anchorRange = if (isAnchorFirst() && isSameDoc) {
+					doc!!.replaceString(swapRange.startOffset, swapRange.endOffset, anchorText)
+					doc!!.replaceString(anchorRange.startOffset, anchorRange.endOffset, swapText)
+				
+					TextRange(swapRange.startOffset + (swapText.length - anchorText.length), swapRange.startOffset + swapText.length)
+				} else {
+					anchorDoc!!.replaceString(anchorRange.startOffset, anchorRange.endOffset, swapText)
+					doc!!.replaceString(swapRange.startOffset, swapRange.endOffset, anchorText)
+					
+					if (!isSameDoc) anchorDoc = doc
+					TextRange(swapRange.startOffset, swapRange.startOffset + anchorText.length)
+				}
 		}
 	}
 	
