@@ -1,55 +1,98 @@
 <idea-plugin>
-  <id>com.jtschwartz.codeswap</id>
-  <name>Code Swap</name>
-  <version>1.0</version>
+	<id>com.jtschwartz.codeswap</id>
+	<name>Code Swap</name>
+	<version>2.0</version>
 	<vendor email="jacob@jtschwartz.com" url="https://jtschwartz.com">Jacob Schwartz</vendor>
 
 	<description>
 		<![CDATA[
-    		Code Swap takes swapping code from:<br/>
-    		<code>temp = a</code><br/>
-    		<code>a = b</code><br/>
-    		<code>b = temp</code><br/>
-    		To:<br/>
-    		<code>a, b = b, a</code>
-    	]]>
+			Code Swap takes swapping code from:<br/><br/>
+			<code>temp = a</code><br/>
+			<code>a = b</code><br/>
+			<code>b = temp</code><br/>
+			To:<br/><br/>
+			<code>a, b = b, a</code>
+
+			<p>
+				Code Swap simplifies copying and pasting lines of code when you are simply swapping them by implementing two concepts, an Anchor and a Swap.
+			</p>
+			<br>
+			<p>
+				The Anchor is the initial selection of code to be selected, and the Swap is the second. They do need to be chosen in order, and will be replaced with each other as soon as the Swap is chosen.
+			</p>
+			<br>
+			<p>
+				Both the Anchor and Swap has two variants: Hard and Soft. The Hard variant will span from the very start of the line the selection starts on, and goes to the end of the line of the selection end, the soft variant spans only exactly what is in your selection. Because of this setup, to set a Soft Anchor or Swap, you must have an actual selection chosen (whether it all be on one line or not), while Hard can work with a selection or a simple caret location.
+			</p>
+			<br>
+			<p>
+				Selections may not overlap and an Anchor and a Swap are not required to match their variants.
+			</p>
+			<br>
+			<p>
+				All four actions can be found in the Edit Menu under the Copy/Paste groups or can be run as keyboard shortcuts:
+			</p>
+
+			<table>
+				<thead>
+					<tr>
+						<th>Shortcut</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>Alt + PageUp</td>
+						<td>Soft Code Anchor</td>
+					</tr>
+					<tr>
+						<td>Alt + PageDown</td>
+						<td>Soft Code Swap</td>
+					</tr>
+					<tr>
+						<td>Ctrl + Alt + PageUp</td>
+						<td>Hard Code Anchor</td>
+					</tr>
+					<tr>
+						<td>Ctrl + Alt + PageDown</td>
+						<td>Hard Code Swap</td>
+					</tr>
+				</tbody>
+			</table>
+			]]>
 	</description>
 
 	<change-notes>
 		<![CDATA[
-      		Initial implementation. No changes, just creation.
-    	]]>
+					Chaining is now possible, fixed bug caused by selection extending past document end
+			]]>
 	</change-notes>
 
-  <idea-version since-build="173.0"/>
+	<idea-version since-build="173.0"/>
 
-  <depends>com.intellij.modules.lang</depends>
+	<depends>com.intellij.modules.lang</depends>
 
-  <extensions defaultExtensionNs="com.intellij">
-    <!-- Add your extensions here -->
-  </extensions>
-
-  <actions>
-	  <action id="com.jtschwartz.codeswap.SoftCodeAnchor" class="com.jtschwartz.codeswap.SoftCodeAnchor"
-			  text="Soft Code Anchor">
-		  <add-to-group group-id="CutCopyPasteGroup" anchor="last"/>
-		  <keyboard-shortcut keymap="$default" first-keystroke="alt PAGE_UP"/>
-	  </action>
-	  <action id="com.jtschwartz.codeswap.HardCodeAnchor" class="com.jtschwartz.codeswap.HardCodeAnchor"
-			  text="Hard Code Anchor">
-		  <add-to-group group-id="CutCopyPasteGroup" anchor="last"/>
-		  <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt PAGE_UP"/>
-	  </action>
-	  <action id="com.jtschwartz.codeswap.SoftCodeSwap" class="com.jtschwartz.codeswap.SoftCodeSwap"
-			  text="Soft Code Swap">
-		  <add-to-group group-id="CutCopyPasteGroup" anchor="last"/>
-		  <keyboard-shortcut keymap="$default" first-keystroke="alt PAGE_DOWN"/>
-	  </action>
-	  <action id="com.jtschwartz.codeswap.HardCodeSwap" class="com.jtschwartz.codeswap.HardCodeSwap"
-			  text="Hard Code Swap">
-		  <add-to-group group-id="CutCopyPasteGroup" anchor="last"/>
-		  <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt PAGE_DOWN"/>
-	  </action>
-  </actions>
+	<actions>
+		<action id="com.jtschwartz.codeswap.SoftCodeAnchor" class="com.jtschwartz.codeswap.SoftCodeAnchor"
+				text="Soft Code Anchor">
+			<add-to-group group-id="CutCopyPasteGroup" anchor="last"/>
+			<keyboard-shortcut keymap="$default" first-keystroke="alt PAGE_UP"/>
+		</action>
+		<action id="com.jtschwartz.codeswap.HardCodeAnchor" class="com.jtschwartz.codeswap.HardCodeAnchor"
+				text="Hard Code Anchor">
+			<add-to-group group-id="CutCopyPasteGroup" anchor="last"/>
+			<keyboard-shortcut keymap="$default" first-keystroke="ctrl alt PAGE_UP"/>
+		</action>
+		<action id="com.jtschwartz.codeswap.SoftCodeSwap" class="com.jtschwartz.codeswap.SoftCodeSwap"
+				text="Soft Code Swap">
+			<add-to-group group-id="CutCopyPasteGroup" anchor="last"/>
+			<keyboard-shortcut keymap="$default" first-keystroke="alt PAGE_DOWN"/>
+		</action>
+		<action id="com.jtschwartz.codeswap.HardCodeSwap" class="com.jtschwartz.codeswap.HardCodeSwap"
+				text="Hard Code Swap">
+			<add-to-group group-id="CutCopyPasteGroup" anchor="last"/>
+			<keyboard-shortcut keymap="$default" first-keystroke="ctrl alt PAGE_DOWN"/>
+		</action>
+	</actions>
 
 </idea-plugin>
