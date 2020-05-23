@@ -13,6 +13,7 @@ abstract class CodeSwapConcept(open var needsSelection: Boolean = true): AnActio
 	companion object {
 		lateinit var anchorRange: TextRange
 		lateinit var swapRange: TextRange
+		val isAnchorFirst = { anchorRange.startOffset < swapRange.startOffset }
 		var doc: Document? = null
 		var editor: Editor?  = null
 		var project: Project?  = null
@@ -23,26 +24,27 @@ abstract class CodeSwapConcept(open var needsSelection: Boolean = true): AnActio
 		editor = e.getData(CommonDataKeys.EDITOR)
 		doc = editor?.document
 		
-		e.presentation.isVisible = if (project != null && editor != null) true else return
-		e.presentation.isEnabled = if (needsSelection) editor!!.selectionModel.hasSelection() else true
+		e.presentation.isVisible = project != null && editor != null
+		e.presentation.isEnabled = e.presentation.isVisible && if (needsSelection) editor!!.selectionModel.hasSelection() else true
 	}
 	
-	protected fun getSelectionRange(editor: Editor, isSoftSelection: Boolean): TextRange {
-		if (isSoftSelection) return TextRange(editor.selectionModel.selectionStart, editor.selectionModel.selectionEnd)
+	protected infix fun getSelectionRangeFrom(editor: Editor): TextRange {
+		if (needsSelection) return TextRange(editor.selectionModel.selectionStart, editor.selectionModel.selectionEnd)
 		
 		return TextRange(doc!!.getLineStartOffset(doc!!.getLineNumber(editor.selectionModel.selectionStart)), doc!!.getLineEndOffset(doc!!.getLineNumber(editor.selectionModel.selectionEnd)))
 	}
 }
 
-open class HardCodeAnchor(override var needsSelection: Boolean = false): CodeSwapConcept() {
+open class SoftCodeAnchor: CodeSwapConcept() {
 	override fun actionPerformed(e: AnActionEvent) {
-		anchorRange = editor?.let {getSelectionRange(it, this is SoftCodeAnchor)}?: return
+		anchorRange = this getSelectionRangeFrom editor!!
 	}
 }
 
-open class HardCodeSwap(override var needsSelection: Boolean = false): CodeSwapConcept() {
+open class SoftCodeSwap: CodeSwapConcept() {
 	override fun actionPerformed(e: AnActionEvent) {
-		swapRange = editor?.let {getSelectionRange(it, this is SoftCodeSwap)}?: return
+		swapRange = this getSelectionRangeFrom editor!!
+		editor!!.caretModel.primaryCaret.removeSelection()
 		
 		if (doSelectionsOverlap()) return
 		
@@ -62,19 +64,13 @@ open class HardCodeSwap(override var needsSelection: Boolean = false): CodeSwapC
 				TextRange(swapRange.startOffset, swapRange.startOffset + anchorText.length)
 			}
 		}
-		
-		editor!!.caretModel.primaryCaret.removeSelection()
 	}
 	
 	private fun doSelectionsOverlap(): Boolean {
 		if (isAnchorFirst()) return anchorRange.endOffset > swapRange.startOffset && anchorRange.endOffset > swapRange.endOffset
 		return anchorRange.endOffset < swapRange.startOffset && anchorRange.endOffset < swapRange.endOffset
 	}
-	
-	private fun isAnchorFirst(): Boolean {
-		return anchorRange.startOffset < swapRange.startOffset
-	}
 }
 
-class SoftCodeAnchor(override var needsSelection: Boolean = true): HardCodeAnchor()
-class SoftCodeSwap(override var needsSelection: Boolean = true): HardCodeSwap()
+class HardCodeAnchor(override var needsSelection: Boolean = false): SoftCodeAnchor()
+class HardCodeSwap(override var needsSelection: Boolean = false): SoftCodeSwap()
